@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "JsonDiff": {
+      "commandName": "Project",
+      "commandLineArgs": "left.json left.json"
+    }
+  }
+}
