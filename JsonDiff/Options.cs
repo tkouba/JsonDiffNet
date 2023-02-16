@@ -20,5 +20,8 @@ namespace JsonDiff
 
         [Option('v', "verbose", Required = false, HelpText = "Set output to verbose messages.")]
         public bool Verbose { get; set; }
+
+        [Option('n', "nocolor", Required = false, HelpText = "Don not create colored console output.")]
+        public bool NoColor { get; set; }
     }
 }

@@ -2,7 +2,7 @@
   "profiles": {
     "JsonDiff": {
       "commandName": "Project",
-      "commandLineArgs": "left.json left.json"
+      "commandLineArgs": "left.json right.json"
     }
   }
 }

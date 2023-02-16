@@ -1,16 +1,12 @@
 ﻿using CommandLine;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 namespace JsonDiff
 {
     internal class Program
     {
-        // https://github.com/andreyvit/json-diff
-        // https://github.com/wbish/jsondiffpatch.net
-        // https://github.com/aminm-net/JsonDiffer.Netstandard
-
         // ! https://stackoverflow.com/questions/24876082/find-and-return-json-differences-using-newtonsoft-in-c
-
 
         static int Main(string[] args)
         {
@@ -20,15 +16,41 @@ namespace JsonDiff
         }
         static int RunOptions(Options opts)
         {
+            if (opts.Verbose)
+                Console.WriteLine("Comparing '{0}' and '{1}'.", opts.LeftFile, opts.RightFile);
             JObject left = JObject.Parse(File.ReadAllText(opts.LeftFile));
             JObject right = JObject.Parse(File.ReadAllText(opts.RightFile));
             JObject diff = FindDiff(left, right);
             if (String.IsNullOrEmpty(opts.OutputFile))
-                Console.WriteLine(diff.ToString());
+            {
+                if (opts.NoColor)
+                {
+                    Console.WriteLine(diff.ToString());
+                }
+                else
+                {
+                    using (StringWriter sw = new StringWriter())
+                    using (AnsiColoredDiffJsonWriter writer = new AnsiColoredDiffJsonWriter(sw))
+                    {
+                        writer.Formatting = Formatting.Indented;
+                        JsonSerializer serializer = new JsonSerializer();
+                        serializer.Serialize(writer, diff);
+                        Console.WriteLine(sw.ToString());
+                    }
+                }
+            }
             else
+            {
+                if (opts.Verbose)
+                    Console.WriteLine("Differences are saved to '{0}'", opts.OutputFile);
                 File.WriteAllText(opts.OutputFile, diff.ToString());
+            }
             if (diff.HasValues == false)
+            {
+                if (opts.Verbose)
+                    Console.WriteLine("Files are same.");
                 return 0;
+            }
             return 1;
         }
         static int HandleParseError(IEnumerable<Error> errs)
@@ -38,12 +60,11 @@ namespace JsonDiff
 
 
         /// <summary>
-        ///
+        /// Compare two JSON and create diff object
         /// </summary>
-        /// <param name="leftJson"></param>
-        /// <param name="rightJson"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentNullException"></exception>
+        /// <param name="leftJson">Left JSON to compare</param>
+        /// <param name="rightJson">Right JSON to compare</param>
+        /// <returns>Diff object with the result.</returns>
         /// <remarks>
         /// Original version https://stackoverflow.com/a/65222961/1498252 by Rohith Daruri
         /// based on https://stackoverflow.com/a/53654737/1498252 by Dzmitry Paliakou
@@ -73,10 +94,10 @@ namespace JsonDiff
                         {
                             difference[tag] = new JObject
                             {
-                                ["-"] = RightJSON[tag]
+                                ["+"] = RightJSON[tag]
                             };
                         }
-                        var ModifiedTags = LeftJSON.Properties().Select(c => c.Name).Except(AddedTags).Except(UnchangedTags);
+                        var ModifiedTags = LeftJSON.Properties().Select(c => c.Name).Except(AddedTags).Except(UnchangedTags).Except(RemovedTags);
                         foreach (var tag in ModifiedTags)
                         {
                             var foundDifference = FindDiff(LeftJSON[tag], RightJSON[tag]);
