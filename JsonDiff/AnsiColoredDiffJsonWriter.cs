@@ -11,7 +11,7 @@ namespace JsonDiff
     {
         TextWriter _writer;
 
-        string? _propertyName;
+        string _propertyName;
         bool _isColor;
 
         public AnsiColoredDiffJsonWriter(TextWriter textWriter) : base(textWriter) => _writer = textWriter;
@@ -26,7 +26,7 @@ namespace JsonDiff
         protected override void WriteEnd(JsonToken token)
         {
             WriteEndColor();
-            base.WriteEnd(token);            
+            base.WriteEnd(token);
         }
 
         protected override void WriteValueDelimiter()
