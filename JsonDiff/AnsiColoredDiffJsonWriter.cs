@@ -50,7 +50,7 @@ namespace JsonDiff
                 if (_propertyName.StartsWith('+'))
                 {
                     _writer.Write("\x1b[32m");
-                    _isColor |= true;
+                    _isColor = true;
                 }
             }
         }
@@ -60,7 +60,7 @@ namespace JsonDiff
             if (_isColor)
             {
                 _writer.Write("\x1b[0m");
-                _isColor |= false;
+                _isColor = false;
             }
         }
     }
