@@ -18,9 +18,11 @@ namespace JsonDiff
         {
             if (opts.Verbose)
                 Console.WriteLine("Comparing '{0}' and '{1}'.", opts.LeftFile, opts.RightFile);
-            JObject left = JObject.Parse(File.ReadAllText(opts.LeftFile));
-            JObject right = JObject.Parse(File.ReadAllText(opts.RightFile));
-            JObject diff = FindDiff(left, right);
+            string leftString = File.ReadAllText(opts.LeftFile);
+            JToken left = leftString.TrimStart().StartsWith('[') ? JArray.Parse(leftString) : JObject.Parse(leftString);
+            string rightString = File.ReadAllText(opts.RightFile);
+            JToken right = rightString.TrimStart().StartsWith('[') ? JArray.Parse(rightString) : JObject.Parse(rightString);
+            JToken diff = FindDiff(left, right);
             if (String.IsNullOrEmpty(opts.OutputFile))
             {
                 if (opts.NoColor)
@@ -69,7 +71,7 @@ namespace JsonDiff
         /// Original version https://stackoverflow.com/a/65222961/1498252 by Rohith Daruri
         /// based on https://stackoverflow.com/a/53654737/1498252 by Dzmitry Paliakou
         /// </remarks>
-        public static JObject FindDiff(JToken leftJson, JToken rightJson)
+        public static JToken FindDiff(JToken leftJson, JToken rightJson)
         {
             var difference = new JObject();
             if (JToken.DeepEquals(leftJson, rightJson)) return difference;
